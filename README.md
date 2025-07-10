@@ -1,530 +1,224 @@
-﻿# \# Player Re-identification in Sports Footage
+# Player Re-identification in Sports Footage
+
+This project implements a computer vision solution for player re-identification in sports footage, specifically addressing **Option 2: Re-Identification in a Single Feed** from the Liat.ai assignment.
 
-# 
+## Overview
 
-# \*\*Assignment\*\*: Liat.ai AI Intern - Player Re-Identification in Sports Footage  
+The system tracks players throughout a video sequence and maintains consistent player IDs even when players temporarily leave the frame and reappear later. This simulates real-time player tracking and re-identification scenarios common in sports analytics.
 
-# \*\*Option Implemented\*\*: Option 2 - Re-Identification in a Single Feed  
-
-# \*\*Submission Date\*\*: July 2025
-
-# 
-
-# \## Overview
-
-# 
-
-# This project implements a computer vision solution for player re-identification in sports footage, specifically addressing \*\*Option 2: Re-Identification in a Single Feed\*\* from the Liat.ai assignment. The system tracks players throughout a video sequence and maintains consistent player IDs even when players temporarily leave the frame and reappear later.
-
-# 
-
-# \## Key Features
-
-# 
-
-# \- \*\*YOLOv11-based Player Detection\*\*: Uses the provided fine-tuned YOLOv11 model for accurate player detection
-
-# \- \*\*Multi-feature Re-identification\*\*: Combines color, texture, shape, and spatial features for robust player identification
-
-# \- \*\*Hungarian Algorithm Assignment\*\*: Optimal detection-to-track association using the Hungarian algorithm
-
-# \- \*\*Temporal Tracking\*\*: Maintains player tracks across frames with motion prediction
-
-# \- \*\*Re-identification System\*\*: Automatically re-identifies players when they return to frame
-
-# \- \*\*Real-time Simulation\*\*: Processes video frame-by-frame to simulate real-time scenarios
-
-# 
-
-# \## Project Structure
-
-# 
-
-# ```
-
-# player\_reidentification/
-
-# ├── src/
-
-# │   ├── detector.py              # YOLOv11 player detection module
-
-# │   ├── feature\_extractor.py     # Multi-feature extraction for re-identification
-
-# │   ├── reid\_system.py          # Main tracking and re-identification system
-
-# │   └── main.py                 # Main execution script
-
-# ├── data/
-
-# │   ├── videos/
-
-# │   │   └── 15sec\_input\_720p.mp4  # Input video file
-
-# │   └── models/
-
-# │       └── yolov11\_player\_detection.pt  # Pre-trained model
-
-# ├── outputs/
-
-# │   ├── final\_results.json      # Frame-by-frame tracking results
-
-# │   └── tracked\_video.mp4       # Output video with tracking visualization (optional)
-
-# ├── reid\_env/                   # Virtual environment
-
-# ├── README.md                   # This file
-
-# ├── report.md                   # Technical report
-
-# ├── requirements\_final.txt      # Python dependencies
-
-# └── SUBMISSION\_SUMMARY.md       # Submission overview
-
-# ```
-
-# 
-
-# \## Dependencies and Environment Requirements
-
-# 
-
-# \### System Requirements
-
-# \- \*\*Python\*\*: 3.8 or higher
-
-# \- \*\*Operating System\*\*: Windows, macOS, or Linux
-
-# \- \*\*Memory\*\*: 4GB+ RAM recommended
-
-# \- \*\*Storage\*\*: 2GB+ free space
-
-# 
-
-# \### Python Dependencies
-
-# ```
-
-# torch>=1.13.0
-
-# torchvision>=0.14.0
-
-# ultralytics>=8.0.0
-
-# opencv-python>=4.7.0
-
-# pillow>=9.0.0
-
-# scikit-image>=0.19.0
-
-# numpy>=1.21.0
-
-# scipy>=1.8.0
-
-# scikit-learn>=1.1.0
-
-# matplotlib>=3.5.0
-
-# ```
-
-# 
-
-# \## Installation and Setup
-
-# 
-
-# \### Step 1: Clone/Download the Repository
-
-# ```bash
-
-# git clone <your-repo-url>
-
-# cd player\_reidentification
-
-# ```
-
-# 
-
-# \### Step 2: Create Virtual Environment
-
-# ```bash
-
-# \# Create virtual environment
-
-# python -m venv reid\_env
-
-# 
-
-# \# Activate environment
-
-# \# On Windows:
-
-# reid\_env\\Scripts\\activate
-
-# \# On Linux/Mac:
-
-# source reid\_env/bin/activate
-
-# ```
-
-# 
-
-# \### Step 3: Install Dependencies
-
-# ```bash
-
-# \# Install all required packages
-
-# pip install -r requirements\_final.txt
-
-# 
-
-# \# Verify installations
-
-# python -c "import torch; print('PyTorch:', torch.\_\_version\_\_)"
-
-# python -c "import cv2; print('OpenCV:', cv2.\_\_version\_\_)"
-
-# python -c "import ultralytics; print('Ultralytics installed')"
-
-# ```
-
-# 
-
-# \### Step 4: Download Required Files
-
-# 1\. \*\*YOLOv11 Model\*\*: Download from the provided Google Drive link and place in `data/models/yolov11\_player\_detection.pt`
-
-# 2\. \*\*Video Data\*\*: Download `15sec\_input\_720p.mp4` and place in `data/videos/`
-
-# 
-
-# \## How to Set Up and Run the Code
-
-# 
-
-# \### Basic Usage
-
-# ```bash
-
-# \# Ensure virtual environment is activated
-
-# reid\_env\\Scripts\\activate  # Windows
-
-# \# source reid\_env/bin/activate  # Linux/Mac
-
-# 
-
-# \# Run basic tracking (JSON output only)
-
-# python src\\main.py --video data\\videos\\15sec\_input\_720p.mp4 --model data\\models\\yolov11\_player\_detection.pt --output\_json outputs\\results.json
-
-# ```
-
-# 
-
-# \### Advanced Usage with All Options
-
-# ```bash
-
-# python src\\main.py \\
-
-# &nbsp;   --video data\\videos\\15sec\_input\_720p.mp4 \\
-
-# &nbsp;   --model data\\models\\yolov11\_player\_detection.pt \\
-
-# &nbsp;   --output\_video outputs\\tracked\_video.mp4 \\
-
-# &nbsp;   --output\_json outputs\\tracking\_results.json \\
-
-# &nbsp;   --similarity\_threshold 0.3 \\
-
-# &nbsp;   --reid\_threshold 0.4 \\
-
-# &nbsp;   --max\_inactive\_frames 30
-
-# ```
-
-# 
-
-# \### Command Line Parameters
-
-# \- `--video`: Path to input video file (required)
-
-# \- `--model`: Path to YOLOv11 model file (required)
-
-# \- `--output\_video`: Path to save annotated output video (optional)
-
-# \- `--output\_json`: Path to save tracking results JSON (default: tracking\_results.json)
-
-# \- `--similarity\_threshold`: Threshold for track association (default: 0.3)
-
-# \- `--reid\_threshold`: Threshold for re-identification (default: 0.4)
-
-# \- `--max\_inactive\_frames`: Max frames before removing inactive tracks (default: 30)
-
-# 
-
-# \## Output Description
-
-# 
-
-# \### 1. Tracking Results JSON
-
-# The system generates a JSON file containing frame-by-frame tracking data:
-
-# ```json
-
-# {
-
-# &nbsp; "0": \[
-
-# &nbsp;   {
-
-# &nbsp;     "track\_id": 1,
-
-# &nbsp;     "bbox": \[100, 150, 180, 300],
-
-# &nbsp;     "confidence": 0.87,
-
-# &nbsp;     "frames\_tracked": 45,
-
-# &nbsp;     "active": true
-
-# &nbsp;   }
-
-# &nbsp; ],
-
-# &nbsp; "1": \[ ... ],
-
-# &nbsp; ...
-
-# }
-
-# ```
-
-# 
-
-# \### 2. Console Output
-
-# The system provides real-time progress and final statistics:
-
-# ```
-
-# Processing video: data/videos/15sec\_input\_720p.mp4
-
-# Processed frame 0
-
-# Processed frame 30
-
-# ...
-
-# Processing complete. Total frames: 375
-
-# 
-
-# ==================================================
-
-# TRACKING STATISTICS
-
-# ==================================================
-
-# Total tracks created: 21
-
-# Currently active tracks: 17
-
-# Inactive tracks: 4
-
-# Frames processed: 375
-
-# ```
-
-# 
-
-# \### 3. Optional Annotated Video
-
-# When `--output\_video` is specified, creates an MP4 file with:
-
-# \- Bounding boxes around detected players
-
-# \- Track IDs displayed above each player
-
-# \- Color-coded tracks for easy visualization
-
-# 
-
-# \## Expected Performance
-
-# 
-
-# Based on the provided test video:
-
-# \- \*\*Detection Rate\*\*: ~16-17 players per frame
-
-# \- \*\*Tracking Consistency\*\*: 21 unique tracks maintained
-
-# \- \*\*Processing Speed\*\*: 2-5 minutes for 15-second video
-
-# \- \*\*Re-identification Success\*\*: High accuracy when players return to frame
-
-# 
-
-# \## Troubleshooting
-
-# 
-
-# \### Common Issues and Solutions
-
-# 
-
-# 1\. \*\*Model Loading Error\*\*
-
-# &nbsp;  ```
-
-# &nbsp;  Error: Model file not found
-
-# &nbsp;  ```
-
-# &nbsp;  - Solution: Ensure YOLOv11 model is downloaded and placed in correct directory
-
-# 
-
-# 2\. \*\*Video Loading Error\*\*
-
-# &nbsp;  ```
-
-# &nbsp;  Error: Video file not found
-
-# &nbsp;  ```
-
-# &nbsp;  - Solution: Verify video file path and format compatibility
-
-# 
-
-# 3\. \*\*Import Errors\*\*
-
-# &nbsp;  ```
-
-# &nbsp;  ModuleNotFoundError: No module named 'cv2'
-
-# &nbsp;  ```
-
-# &nbsp;  - Solution: Ensure virtual environment is activated and dependencies installed
-
-# 
-
-# 4\. \*\*Memory Issues\*\*
-
-# &nbsp;  ```
-
-# &nbsp;  Out of memory error
-
-# &nbsp;  ```
-
-# &nbsp;  - Solution: Close other applications or reduce video resolution
-
-# 
-
-# 5\. \*\*Low Performance\*\*
-
-# &nbsp;  - Solution: Adjust similarity thresholds or reduce max\_inactive\_frames
-
-# 
-
-# \### Debug Mode
-
-# For troubleshooting, you can test individual components:
-
-# ```bash
-
-# \# Test detector only
-
-# python -c "
-
-# import sys; sys.path.append('src')
-
-# from detector import PlayerDetector
-
-# detector = PlayerDetector('data/models/yolov11\_player\_detection.pt')
-
-# print('Detector loaded successfully')
-
-# "
-
-# 
-
-# \# Test video loading
-
-# python -c "
-
-# import cv2
-
-# cap = cv2.VideoCapture('data/videos/15sec\_input\_720p.mp4')
-
-# print('Video opened:', cap.isOpened())
-
-# cap.release()
-
-# "
-
-# ```
-
-# 
-
-# \## Algorithm Overview
-
-# 
-
-# \### Detection Pipeline
-
-# 1\. \*\*YOLOv11 Detection\*\*: Identifies players in each frame (class\_id=2)
-
-# 2\. \*\*Feature Extraction\*\*: Extracts multi-modal features for each detection
-
-# 3\. \*\*Track Association\*\*: Uses Hungarian algorithm for optimal assignment
-
-# 4\. \*\*Re-identification\*\*: Matches returning players with inactive tracks
-
-# 
-
-# \### Key Technical Components
-
-# \- \*\*Multi-feature Similarity\*\*: Combines color histograms, HOG, LBP, and spatial features
-
-# \- \*\*Motion Prediction\*\*: Linear velocity model for position prediction
-
-# \- \*\*Track Management\*\*: Smart activation/deactivation of player tracks
-
-# \- \*\*Robust Matching\*\*: Weighted similarity scoring with reliability boosting
-
-# 
-
-# \## Citation and References
-
-# 
-
-# This implementation uses:
-
-# \- \*\*YOLOv11\*\*: Ultralytics implementation for object detection
-
-# \- \*\*Hungarian Algorithm\*\*: SciPy's linear\_sum\_assignment for optimal matching
-
-# \- \*\*HOG Features\*\*: Scikit-image's histogram of oriented gradients
-
-# \- \*\*OpenCV\*\*: Computer vision operations and video processing
-
-# 
-
-# \## License
-
-# 
-
-# This project is developed for the Liat.ai assignment and is intended for educational and evaluation purposes.
-
-# 
-
-# \## Contact
-
-# 
-
-# For questions or issues regarding this implementation, please contact the assignment evaluators at Liat.ai.
-
+## Key Features
+
+- **YOLOv11-based Player Detection**: Uses the provided fine-tuned YOLOv11 model for accurate player detection
+- **Multi-feature Re-identification**: Combines color, texture, shape, and spatial features for robust player identification
+- **Hungarian Algorithm Assignment**: Optimal detection-to-track association using the Hungarian algorithm
+- **Temporal Tracking**: Maintains player tracks across frames with motion prediction
+- **Re-identification System**: Automatically re-identifies players when they return to frame
+- **Real-time Simulation**: Processes video frame-by-frame to simulate real-time scenarios
+
+## Project Structure
+
+```
+player_reidentification/
+├── src/
+│   ├── detector.py              # YOLOv11 player detection module
+│   ├── feature_extractor.py     # Multi-feature extraction for re-identification
+│   ├── reid_system.py          # Main tracking and re-identification system
+│   └── main.py                 # Main execution script
+├── data/
+│   ├── videos/
+│   │   └── 15sec_input_720p.mp4  # Input video file
+│   └── models/
+│       └── yolov11_player_detection.pt  # Pre-trained model
+├── outputs/
+│   ├── tracking_results.json    # Frame-by-frame tracking results
+│   └── annotated_video.mp4     # Output video with tracking visualization
+├── requirements.txt            # Python dependencies
+├── README.md                  # This file
+└── report.md                  # Technical report
+```
+
+## Installation and Setup
+
+### 1. Clone/Download the Repository
+
+```bash
+git clone <your-repo-url>
+cd player_reidentification
+```
+
+### 2. Create Virtual Environment
+
+```bash
+python -m venv reid_env
+source reid_env/bin/activate  # On Windows: reid_env\Scripts\activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Download Required Files
+
+1. **Download the YOLOv11 model** from the provided Google Drive link:
+   - Place it in `data/models/yolov11_player_detection.pt`
+
+2. **Download the test video** from the assignment materials:
+   - Place it in `data/videos/15sec_input_720p.mp4`
+
+## Usage
+
+### Basic Usage
+
+```bash
+python src/main.py --video data/videos/15sec_input_720p.mp4 --model data/models/yolov11_player_detection.pt
+```
+
+### Advanced Usage with Custom Parameters
+
+```bash
+python src/main.py \
+    --video data/videos/15sec_input_720p.mp4 \
+    --model data/models/yolov11_player_detection.pt \
+    --output_video outputs/tracked_video.mp4 \
+    --output_json outputs/tracking_results.json \
+    --similarity_threshold 0.3 \
+    --reid_threshold 0.4 \
+    --max_inactive_frames 30
+```
+
+### Parameters
+
+- `--video`: Path to input video file (required)
+- `--model`: Path to YOLOv11 model file (required)
+- `--output_video`: Path to save annotated output video (optional)
+- `--output_json`: Path to save tracking results JSON (default: tracking_results.json)
+- `--similarity_threshold`: Threshold for track association (default: 0.3)
+- `--reid_threshold`: Threshold for re-identification (default: 0.4)
+- `--max_inactive_frames`: Max frames before removing inactive tracks (default: 30)
+
+## Output
+
+The system generates two main outputs:
+
+### 1. Tracking Results JSON
+Contains frame-by-frame tracking data:
+```json
+{
+  "0": [
+    {
+      "track_id": 1,
+      "bbox": [100, 150, 180, 300],
+      "confidence": 0.87,
+      "frames_tracked": 45,
+      "active": true
+    }
+  ]
+}
+```
+
+### 2. Annotated Video (Optional)
+Video file with bounding boxes and track IDs overlaid on each frame.
+
+## Technical Approach
+
+### 1. Player Detection
+- Uses fine-tuned YOLOv11 model for robust player detection
+- Filters detections by confidence threshold
+- Extracts player bounding boxes and cropped regions
+
+### 2. Feature Extraction
+Combines multiple feature types for robust re-identification:
+
+**Color Features:**
+- HSV color histograms (more robust to lighting changes)
+- Dominant jersey and shorts colors
+- Color moments (mean, std, skewness)
+
+**Texture Features:**
+- Histogram of Oriented Gradients (HOG)
+- Local Binary Patterns (LBP)
+
+**Shape Features:**
+- Bounding box dimensions and aspect ratio
+- Relative size compared to frame
+
+**Spatial Features:**
+- Normalized position in frame
+- Motion vectors and velocity
+
+### 3. Tracking and Association
+- **Hungarian Algorithm**: Optimal assignment of detections to tracks
+- **Motion Prediction**: Linear motion model for predicting next positions
+- **Multi-criteria Similarity**: Combines feature similarity and spatial proximity
+
+### 4. Re-identification
+- Maintains feature profiles for inactive tracks
+- Compares new detections with inactive track features
+- Reactivates best matching tracks above threshold
+
+### 5. Track Management
+- Creates new tracks for unassigned detections
+- Deactivates tracks after extended periods without detection
+- Maintains track history for improved re-identification
+
+## Dependencies
+
+- **Python 3.8+**
+- **PyTorch**: Deep learning framework
+- **Ultralytics**: YOLOv11 implementation
+- **OpenCV**: Computer vision operations
+- **NumPy**: Numerical computations
+- **SciPy**: Optimization algorithms (Hungarian method)
+- **scikit-learn**: Machine learning utilities
+- **scikit-image**: Image processing (HOG features)
+
+## Performance Considerations
+
+### Accuracy Optimizations
+- Multiple feature types reduce false associations
+- Temporal consistency through motion prediction
+- Re-identification prevents ID switching for returning players
+
+### Efficiency Optimizations
+- Feature vector caching for active tracks
+- Limited history storage (configurable)
+- Early termination for low-confidence detections
+
+## Evaluation
+
+The system is evaluated on:
+- **Accuracy**: Consistency of player IDs throughout video
+- **Re-identification Success**: Correctly identifying returning players
+- **False Positive Rate**: Incorrectly creating new tracks for existing players
+- **Tracking Stability**: Maintaining tracks through occlusions and motion
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Model not found**: Ensure YOLOv11 model is downloaded and placed correctly
+2. **Video codec issues**: Install additional codecs if video won't load
+3. **Memory issues**: Reduce history sizes in track configuration
+4. **Poor tracking**: Adjust similarity thresholds based on video characteristics
+
+### Debug Mode
+
+For single-frame testing:
+```python
+# Uncomment in main.py
+test_single_frame()
+```
+
+## Future Improvements
+
+- **Deep Learning Features**: Integration of CNN-based re-identification features
+- **Multi-camera Support**: Extension to cross-camera player mapping
+- **Real-time Processing**: Optimization for live video streams
+- **Team Classification**: Automatic team assignment based on jersey colors
+- **Pose Features**: Integration of player pose/skeleton features
+
+## License
+
+This project is developed for the Liat.ai assignment and is intended for educational and evaluation purposes.
